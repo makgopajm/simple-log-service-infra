@@ -12,7 +12,7 @@ on:
     types:
       - closed
 
-Jobs:
+jobs:
   terraform:
     name: Terraform-Apply
     runs-on: ubuntu-

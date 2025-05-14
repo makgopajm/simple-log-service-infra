@@ -1,0 +1,54 @@
+
+# To automate Terraform infrastructure builds into AWS without running commands on the AWS CLI manually.
+# We can use CI/CD tools like GitHub Actions, Terraform Cloud, or AWS-native service like CodePipeline to handle Terraform automation for you.
+
+
+name: Deploy Terraform Infrastructure to AWS
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+Jobs:
+  terraform:
+    name: Terraform-Apply
+    runs-on: ubuntu-
+    if: |
+     github.event.pull_request.merged == true && containers(github.event.pull_request.labels.*.name, 'dev')
+  
+  permissions:
+    id-token: write
+    contents: read
+  
+  steps:
+   - name: Checkout code
+     usees: actions/checkout@v3
+
+   - name: Configure AWS credentials
+     uses: aws-actions/configure-aws-credentials@v2
+     with:
+      role-to-assume: arn:aws:iam::992382425379:role/GithubRole
+      aws-region: us-east-1
+
+   - name: Setup Terraform
+     uses: hashicorp/setup-terraform@v3
+     with:
+      terraform_version: 1.6.6
+
+   - name: Terraform Init
+     run: terraform init
+
+   - name: Terraform Format Check
+     run: terraform fmt -check
+
+   - name: Terraform Validate
+     run: terraform validate
+
+   - name: Terraform Plan
+     run: terraform plan -out=tfplan
+
+   - name: Terraform Apply
+     run: terraform apply -auto-approve tfplan

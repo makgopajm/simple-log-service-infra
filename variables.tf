@@ -1,0 +1,30 @@
+
+/**
+    
+    Input variables let you customize aspects of Terraform modules without altering the module's own source code
+    This functionality allowes you to share modules across different Terraform configurations, making your module composable and resuable.
+
+**/
+
+variable "product_name" {
+    type = string
+    default = "log-service"
+    description = "Enter product name"
+  
+}
+
+
+variable "region" {
+    type = string
+    default = "us-east-1"
+    description = "Enter AWS region"
+  
+}
+
+
+variable "env" {
+    type = string
+    default = "dev"
+    description = "Ente environment namer"
+  
+}

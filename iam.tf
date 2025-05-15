@@ -123,6 +123,13 @@ resource "aws_iam_policy" "lambda_dynamodb_logs_policy" {
                         "ecr:BatchCheckLayerAvailability"
                      ],
                     Resource = "*"
+                },
+                {
+                    Effect ="Allow",
+                    Action = [
+                        "ecr:GetAuthorizationToken"
+                     ],
+                    Resource = "*"
                 }
             ]
         }

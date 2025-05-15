@@ -109,6 +109,15 @@ resource "aws_iam_policy" "lambda_dynamodb_logs_policy" {
                         "logs:PutLogEvents"
                     ],
                     Resource = "*" # Come back and change
+                },
+                {
+                    Effect ="Allow",
+                    Action = [
+                        "ecr:GetDownloadUrlForLayer",
+                        "ecr:BatchGetImage",
+                        "ecr:BatchCheckLayerAvailability"
+                     ],
+                    Resource = "*"
                 }
             ]
         }

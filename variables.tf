@@ -29,7 +29,12 @@ variable "env" {
   
 }
 
-variable "image_tag" {
+variable "wr_image_tag" {
   description = "ECR Image Tag"
   default = "1"
+}
+
+variable "rd_image_tag" {
+  description = "ECR Image Tag"
+  default = "5"
 }

@@ -55,7 +55,7 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy" {
         }
     )
 
-    depends_on = [ aws_s3_bucket_public_access_block.simple_log_service_s3_public_bloc ]
+    depends_on = [ aws_s3_bucket_public_access_block.simple_log_service_s3_public_block ]
   
 }
 

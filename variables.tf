@@ -28,3 +28,8 @@ variable "env" {
     description = "Environment namer"
   
 }
+
+variable "image_tag" {
+  description = "ECR Image Tag"
+  default = "1"
+}

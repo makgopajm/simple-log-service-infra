@@ -24,6 +24,7 @@ jobs:
   terraform:
     name: Terraform-Apply
     runs-on: ubuntu-latest
+    environment: Configure AWS
     if: github.event.pull_request.merged == true && contains(join(github.event.pull_request.labels.*.name, ','), 'dev')
 
     permissions:

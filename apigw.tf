@@ -35,8 +35,8 @@ resource "aws_api_gateway_integration" "simple_log_service_write_integration" {
     http_method = aws_api_gateway_method.simple_log_service_post.http_method
     integration_http_method = "POST"
     type = "AWS_PROXY" # For Lambda proxy integration
-    uri = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${aws_lambda_function.simple_log_service_write_lambda.arn}/invocations"
-  
+    #uri = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${aws_lambda_function.simple_log_service_write_lambda.arn}/invocations"
+    uri = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${module.simple_log_service_write_lambda.function_arn}/invocations" 
 }
 
 
@@ -61,7 +61,7 @@ resource "aws_api_gateway_integration" "simple_log_service_read_integration" {
     http_method = aws_api_gateway_method.simple_log_service_get.http_method
     integration_http_method = "POST"
     type = "AWS_PROXY" # For Lambda proxy integration
-    uri =  "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${aws_lambda_function.simple_log_service_read_lambda.arn}/invocations"
+    uri =  "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${module.simple_log_service_read_lambda.function_arn}/invocations"
   
 }
 

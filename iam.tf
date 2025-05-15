@@ -14,7 +14,9 @@ resource "aws_dynamodb_resource_policy" "dynamodb_resource_policy" {
                 Effect = "Allow",
                 Principal = {
                     AWS = [
-                        "${aws_iam_role.lambda_write_role.arn}" # 2 for reader and writer lambda IAM role
+                        "${aws_iam_role.lambda_write_role.arn}",
+                        "arn:aws:iam::016015284752:role/GitHub_IAM_Role",
+                        "arn:aws:iam::016015284752:user/JB_Admin" # 2 for reader and writer lambda IAM role
 
                     ]
                 }

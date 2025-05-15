@@ -27,7 +27,7 @@
 module "simple_log_service_write_lambda" {
     source = "./modules/lambda_function"
     function_name = "${var.product_name}-writer-lambda"
-    image_uri = aws_ecr_repository.simple_log_service_ecr.repository_url
+    image_uri = module.simple_log_service_ecr_write_image.ecr_repo_uri
     runtime = var.python_version
     role_arn = aws_iam_role.lambda_write_role.arn
     
@@ -39,7 +39,7 @@ module "simple_log_service_write_lambda" {
 module "simple_log_service_read_lambda" {
     source = "./modules/lambda_function"
     function_name = "${var.product_name}-reader-lambda"
-    image_uri = aws_ecr_repository.simple_log_service_ecr.repository_url
+    image_uri = module.simple_log_service_ecr_read_image.ecr_repo_uri
     runtime = var.python_version
     role_arn = aws_iam_role.lambda_write_role.arn
     

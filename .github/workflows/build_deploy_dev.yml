@@ -18,6 +18,7 @@ on:
 env:
   OIDC_ROLE: ${{ secrets.GITHUBACTIONSROLE }}
   AWS_ACCOUNT_ID: ${{ secrets.ACCOUNT }}
+  ENV_VAR: dev
 
 # Define the steps for the job.
 jobs:
@@ -47,7 +48,10 @@ jobs:
           terraform_version: 1.6.6
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -backend-config="key=simple-log-service-infra/${ENV_VAR}/terraform.tfstate"
+
+      - name: Select Dev Workspace
+        run: terraform workspace select dev || terraform workspace new dev
 
         # terraform fix format
       - name: Terraform format

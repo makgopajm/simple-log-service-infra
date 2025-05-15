@@ -50,6 +50,10 @@ jobs:
 
       - name: Select Dev Workspace
         run: terraform workspace select dev || terraform workspace new dev
+      
+      # Sync state with actual infrastructure
+      - name: Terraform Refresh
+        run: terraform refresh
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve

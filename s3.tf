@@ -26,6 +26,15 @@ resource "aws_s3_bucket_website_configuration" "simple_log_service_s3_website" {
   
 }
 
+resource "aws_s3_bucket_public_access_block" "simple_log_service_s3_public_block" {
+  bucket =  aws_s3_bucket.simple_log_service_s3_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 /**
     Cross-origin resource sharing (CORS) - define a way for client web applications that are loaded in one domain to interact with resources in a different domain
 **/

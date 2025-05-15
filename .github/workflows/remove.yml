@@ -12,6 +12,8 @@ env:
   OIDC_ROLE: ${{ secrets.GITHUBACTIONSROLE }}
   AWS_ACCOUNT_ID: ${{ secrets.ACCOUNT }}
   ENV_VAR: dev
+  STATE_BUCKET: your-terraform-backend-bucket-name  # Replace this
+  STATE_KEY: simple-log-service-infra/dev/terraform.tfstate
 
 jobs:
   terraform:
@@ -40,10 +42,14 @@ jobs:
           terraform_version: 1.6.6
 
       - name: Terraform Init
-        run: terraform init -backend-config="key=simple-log-service-infra/${ENV_VAR}/terraform.tfstate"
+        run: terraform init -backend-config="key=${STATE_KEY}"
 
       - name: Select Dev Workspace
         run: terraform workspace select dev || terraform workspace new dev
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
+
+      - name: Delete Terraform state file from S3
+        run: |
+          aws s3 rm s3://${STATE_BUCKET}/${STATE_KEY}

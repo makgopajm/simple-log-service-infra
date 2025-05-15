@@ -14,14 +14,18 @@ resource "aws_dynamodb_resource_policy" "dynamodb_resource_policy" {
                 Effect = "Allow",
                 Principal = {
                     AWS = [
-                        "${aws_iam_role.lambda_write_role.arn}",
+                        "${aws_iam_role.lambda_write_role.arn}" # 2 for reader and writer lambda IAM role
 
                     ]
                 }
                 Action = [
                     "dynamodb:PutItem",
                     "dynamodb:UpdateItem",
-                    "dynamodb:DeleteItem"
+                    "dynamodb:DeleteItem",
+                    "dynamodb:GetItem",
+                    "dynamodb:Scan"
+
+
                 ],
                 Resource = "${aws_dynamodb_table.simple_log_service_dynamodb.arn}"
             }
@@ -54,7 +58,7 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy" {
 # Lambda Execution role - To allow lambda to read and write from DynamoDB table and CloudWatch Logs
 
 resource "aws_iam_role" "lambda_write_role" {
-    name = var.product_name
+    name ="${var.product_name}"
 
     assume_role_policy = jsonencode(
         {

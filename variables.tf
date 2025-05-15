@@ -9,7 +9,7 @@
 variable "product_name" {
     type = string
     default = "log-service"
-    description = "Enter product name"
+    description = "Product name"
   
 }
 
@@ -17,7 +17,7 @@ variable "product_name" {
 variable "region" {
     type = string
     default = "us-east-1"
-    description = "Enter AWS region"
+    description = "AWS region"
   
 }
 
@@ -25,6 +25,13 @@ variable "region" {
 variable "env" {
     type = string
     default = "dev"
-    description = "Ente environment namer"
+    description = "Environment namer"
+  
+}
+
+variable "python_version" {
+    type = string
+    default = "python3.13"
+    description = "Python version"
   
 }

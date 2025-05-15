@@ -5,7 +5,6 @@
 name: Deploy Terraform Infrastructure to AWS
 
 # Define workflow trigger
-
 on:
   pull_request:
     branches:
@@ -55,15 +54,19 @@ jobs:
       - name: Select Dev Workspace
         run: terraform workspace select dev || terraform workspace new dev
 
-        # terraform fix format
+      # Sync state with actual infrastructure
+      - name: Terraform Refresh
+        run: terraform refresh
+
+      # terraform fix format
       - name: Terraform format
         run: terraform fmt -recursive
 
-        # check terraform formatting 
+      # check terraform formatting 
       - name: Terraform Format Check
         run: terraform fmt -check
 
-        # Checks syntax and internal consistency.
+      # Checks syntax and internal consistency.
       - name: Terraform Validate
         run: terraform validate
 

@@ -8,11 +8,6 @@ variable "image_uri" {
     description = "URI of ECR"
 }
 
-variable "runtime" {
-    type = string
-    description = "Lambda runtime"
-}
-
 variable "timeout" {
     description = "Lambda execution timeout"
     type = number

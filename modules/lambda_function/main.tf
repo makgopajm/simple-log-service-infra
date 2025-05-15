@@ -3,9 +3,8 @@ resource "aws_lambda_function" "basic_lambda" {
     package_type = "Image"
     image_uri = var.image_uri
     role = var.role_arn
-    runtime = var.runtime
-    timeout = var.timeout
-    memory_size = var.memory_size
+    timeout = 5
+    memory_size = 128
 
     environment {
       variables = var.environment_variables

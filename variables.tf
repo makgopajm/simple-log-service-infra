@@ -28,10 +28,3 @@ variable "env" {
     description = "Environment namer"
   
 }
-
-variable "python_version" {
-    type = string
-    default = "python3.13"
-    description = "Python version"
-  
-}

@@ -12,7 +12,7 @@ env:
   OIDC_ROLE: ${{ secrets.GITHUBACTIONSROLE }}
   AWS_ACCOUNT_ID: ${{ secrets.ACCOUNT }}
   ENV_VAR: dev
-  STATE_BUCKET: your-terraform-backend-bucket-name  # Replace this
+  STATE_BUCKET: jbterraformwork
   STATE_KEY: simple-log-service-infra/dev/terraform.tfstate
 
 jobs:

@@ -5,6 +5,7 @@
 name: Deploy Terraform Infrastructure to AWS
 
 # Define workflow trigger
+
 on:
   pull_request:
     branches:

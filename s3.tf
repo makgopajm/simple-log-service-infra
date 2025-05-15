@@ -7,15 +7,9 @@
 # Creating an S3 bucket
 
 resource "aws_s3_bucket" "simple_log_service_s3_bucket" {
-    bucket ="${var.product_name}-992382425379"
-    provider = aws.use1
-
+    bucket ="${var.product_name}-${data.aws_caller_identity.current.id}"
 }
 
-provider "aws" {
-  alias  = "use1"
-  region = "us-east-1"
-}
 
 # Enable static website hosting on the S3 bucket
 

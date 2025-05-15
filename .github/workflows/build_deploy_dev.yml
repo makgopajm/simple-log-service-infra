@@ -1,8 +1,10 @@
 # Automate Terraform infrastructure builds into AWS using GitHub Actions.
 # This workflow applies changes when a pull request to the main branch is merged and has a 'dev' label.
 
+# Workflow name
 name: Deploy Terraform Infrastructure to AWS
 
+# Define workflow trigger
 on:
   pull_request:
     branches:
@@ -11,6 +13,12 @@ on:
       - closed
   workflow_dispatch:
 
+# Define variables, so that they can be reused. The variable are stored as GitHub secrets.
+env:
+  OIDC_ROLE: ${{ secrets.GITHUBACTIONSROLE }}
+  AWS_ACCOUNT_ID: ${{ secrets.ACCOUNT }}
+
+# Define the steps for the job.
 jobs:
   terraform:
     name: Terraform-Apply
@@ -28,7 +36,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::992382425379:role/GithubRole
+          role-to-assume: {{env.OIDC_ROLE}}
           aws-region: us-east-1
 
       - name: Setup Terraform

@@ -10,3 +10,4 @@
 product-name = "log-service"
 env = "prod"
 region = "us-east-1"
+python_version = "python3.13"

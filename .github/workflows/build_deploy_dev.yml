@@ -35,6 +35,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Debug OIDC Role
+        run: echo "OIDC role to assume: $OIDC_ROLE"
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:

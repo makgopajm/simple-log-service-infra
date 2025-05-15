@@ -81,6 +81,11 @@ resource "aws_iam_role" "lambda_write_role" {
   
 }
 
+resource "aws_iam_role_policy_attachment" "attach_Lambda_Role_To_Policy" {
+  role       = aws_iam_role.lambda_write_role.name
+  policy_arn = aws_iam_policy.lambda_dynamodb_logs_policy.arn
+}
+
 resource "aws_iam_policy" "lambda_dynamodb_logs_policy" {
     name = var.env
     description = "Allows Lambda to access DynamoDB and CloudWatch Logs"

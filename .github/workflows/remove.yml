@@ -1,3 +1,5 @@
+# Destroys resource when no longer needed.
+
 name: Destroy Terraform Infrastructure from AWS
 
 on:
@@ -22,6 +24,7 @@ jobs:
     environment: AWS
     if: github.event.pull_request.merged == true && contains(join(github.event.pull_request.labels.*.name, ','), 'destroy')
 
+    # Grants the workflow secure AWS access via OIDC (id-token: write) and read-only repo access (contents: read).
     permissions:
       id-token: write
       contents: read
@@ -36,6 +39,7 @@ jobs:
           role-to-assume: ${{ env.OIDC_ROLE }}
           aws-region: us-east-1
 
+      # Sets up Terraform CLI version 1.6.6 in the GitHub Actions runner using the official HashiCorp action.
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:

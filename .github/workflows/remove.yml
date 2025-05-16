@@ -3,11 +3,11 @@
 name: Destroy Terraform Infrastructure from AWS
 
 on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - closed
+  # pull_request:
+  #   branches:
+  #     - main
+  #   types:
+  #     - closed
   workflow_dispatch:
 
 env:
@@ -22,7 +22,7 @@ jobs:
     name: Terraform-Destroy
     runs-on: ubuntu-latest
     environment: AWS
-    if: github.event.pull_request.merged == true && contains(join(github.event.pull_request.labels.*.name, ','), 'destroy')
+    # if: github.event.pull_request.merged == true && contains(join(github.event.pull_request.labels.*.name, ','), 'destroy')
 
     # Grants the workflow secure AWS access via OIDC (id-token: write) and read-only repo access (contents: read).
     permissions:

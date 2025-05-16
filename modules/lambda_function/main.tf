@@ -10,4 +10,8 @@ resource "aws_lambda_function" "basic_lambda" {
       variables = var.environment_variables
     }
 
+    lifecycle {
+      ignore_changes = [image_uri]
+  }
+
 }

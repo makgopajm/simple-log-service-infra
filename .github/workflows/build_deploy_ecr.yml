@@ -5,7 +5,6 @@
 name: Build & Deploy ECR
 
 on:
-  on:
   pull_request:
     branches:
       - main

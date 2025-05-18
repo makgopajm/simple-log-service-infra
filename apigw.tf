@@ -88,6 +88,15 @@ resource "aws_api_gateway_integration_response" "options_write_logs_200" {
   }
 }
 
+resource "aws_lambda_permission" "allow_apigw_invoke_write" {
+  statement_id  = "AllowAPIGatewayInvokeWrite"
+  action        = "lambda:InvokeFunction"
+  function_name = module.simple_log_service_write_lambda.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  source_arn = "${aws_api_gateway_rest_api.simple_log_service_api.execution_arn}/*/*/write-logs"
+}
+
 /** Configurations for the read endpoint **/
 
 resource "aws_api_gateway_resource" "simple_log_service_api_read" {
@@ -115,9 +124,13 @@ resource "aws_api_gateway_integration" "simple_log_service_read_integration" {
 
 resource "aws_api_gateway_deployment" "simple_log_service_api_deployment" {
     depends_on = [ aws_api_gateway_integration.simple_log_service_write_integration,
-    aws_api_gateway_integration.simple_log_service_read_integration ]
+    aws_api_gateway_integration.simple_log_service_read_integration, aws_api_gateway_integration.options_write_logs,
+  aws_api_gateway_integration.simple_log_service_options_integration ]
 
     rest_api_id = aws_api_gateway_rest_api.simple_log_service_api.id
+    triggers = {
+    redeployment = timestamp()
+  }
   
 }
 
@@ -175,4 +188,13 @@ resource "aws_api_gateway_integration_response" "simple_log_service_options_inte
   response_templates = {
     "application/json" = ""
   }
+}
+
+resource "aws_lambda_permission" "allow_apigw_invoke_read" {
+  statement_id  = "AllowAPIGatewayInvokeRead"
+  action        = "lambda:InvokeFunction"
+  function_name = module.simple_log_service_read_lambda.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  source_arn = "${aws_api_gateway_rest_api.simple_log_service_api.execution_arn}/*/*/read-logs"
 }

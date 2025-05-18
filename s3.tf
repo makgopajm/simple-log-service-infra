@@ -8,6 +8,7 @@
 
 resource "aws_s3_bucket" "simple_log_service_s3_bucket" {
     bucket ="${var.product_name}-${data.aws_caller_identity.current.id}"
+    force_destroy = true
 }
 
 

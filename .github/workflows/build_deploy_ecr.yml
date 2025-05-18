@@ -12,6 +12,7 @@ env:
   OIDC_ROLE: ${{ secrets.GITHUBACTIONSROLE }}
   AWS_ACCOUNT_ID: ${{ secrets.ACCOUNT }}
   ENV_VAR: dev
+  AWS_REGION: ${{ env.AWS_REGION }}
 
 jobs:
   setup-ecr:

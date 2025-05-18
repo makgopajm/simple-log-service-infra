@@ -1,27 +1,23 @@
 # Automate Terraform infrastructure builds into AWS using GitHub Actions.
 # This workflow applies changes when a pull request to the main branch is merged and has a 'dev' label.
 
-# Workflow name
-name: Deploy Terraform Infrastructure to AWS
+name: Deploy Infrastructure
 
-# Define workflow trigger
 on:
   pull_request:
     branches:
-      - develop
+      - main
     types:
       - closed
   workflow_dispatch:
   repository_dispatch:
     types: [deploy-infra]
 
-# Define variables, so that they can be reused. The variable are stored as GitHub secrets.
 env:
   OIDC_ROLE: ${{ secrets.GITHUBACTIONSROLE }}
   AWS_ACCOUNT_ID: ${{ secrets.ACCOUNT }}
   ENV_VAR: dev
 
-# Define the steps for the job.
 jobs:
   terraform:
     name: Terraform-Apply
@@ -30,6 +26,7 @@ jobs:
     outputs:
       api_url_writer: ${{ steps.extract.outputs.api_url_writer }}
       api_url_reader: ${{ steps.extract.outputs.api_url_reader }}
+      s3_bucket_name: ${{ steps.extract.outputs.s3_bucket_name }}
     if: github.event.pull_request.merged == true && contains(join(github.event.pull_request.labels.*.name, ','), 'dev')
 
     permissions:
@@ -40,14 +37,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-        # OIDC - To get temporary credentials from AWS
+      # OIDC - To get temporary credentials from AWS
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ env.OIDC_ROLE }}
           aws-region: us-east-1
 
-        # Sets up Terraform CLI version 1.6.6 in the GitHub Actions runner using the official HashiCorp action.
+      # Setup Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -63,15 +60,15 @@ jobs:
       - name: Terraform Refresh
         run: terraform refresh
 
-      # terraform fix format
+      # Terraform formatting fixes
       - name: Terraform format
         run: terraform fmt -recursive
 
-      # check terraform formatting 
+      # Check terraform formatting 
       - name: Terraform Format Check
         run: terraform fmt -check
 
-      # Checks syntax and internal consistency.
+      # Validate Terraform config
       - name: Terraform Validate
         run: terraform validate
 
@@ -81,13 +78,15 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
 
-      - name: Extract API Gateway URLs from Terraform Output
+      - name: Extract outputs from Terraform
         id: extract
         run: |
-          echo "api_url_writer=$(terraform output -raw writer_api_url)" >> $GITHUB_OUTPUT
-          echo "api_url_reader=$(terraform output -raw reader_api_url)" >> $GITHUB_OUTPUT
+          base_url=$(terraform output -raw api_gw_url)
+          echo "api_url_writer=${base_url}/write-logs" >> $GITHUB_OUTPUT
+          echo "api_url_reader=${base_url}/read-logs" >> $GITHUB_OUTPUT
+          echo "s3_bucket_name=$(terraform output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
 
-        # Deploy Frontend
+      # Trigger frontend deployment via repository_dispatch with all URLs and bucket name
       - name: Trigger S3 Code Deploy
         uses: peter-evans/repository-dispatch@v2
         with:
@@ -97,82 +96,87 @@ jobs:
           client-payload: >-
             {
               "writer_url": "${{ steps.extract.outputs.api_url_writer }}",
-              "reader_url": "${{ steps.extract.outputs.api_url_reader }}"
+              "reader_url": "${{ steps.extract.outputs.api_url_reader }}",
+              "s3_bucket_name": "${{ steps.extract.outputs.s3_bucket_name }}"
             }
 
   terraform_dispatch:
-        name: Terraform-Apply-disatch
-        runs-on: ubuntu-latest
-        environment: AWS
-        outputs:
-          api_url_writer: ${{ steps.extract.outputs.api_url_writer }}
-          api_url_reader: ${{ steps.extract.outputs.api_url_reader }}
-        if: github.event_name == 'repository_dispatch'
-    
-        permissions:
-          id-token: write
-          contents: read
-    
-        steps:
-          - name: Checkout code
-            uses: actions/checkout@v3
-    
-            # OIDC - To get temporary credentials from AWS
-          - name: Configure AWS credentials
-            uses: aws-actions/configure-aws-credentials@v3
-            with:
-              role-to-assume: ${{ env.OIDC_ROLE }}
-              aws-region: us-east-1
-    
-            # Sets up Terraform CLI version 1.6.6 in the GitHub Actions runner using the official HashiCorp action.
-          - name: Setup Terraform
-            uses: hashicorp/setup-terraform@v3
-            with:
-              terraform_version: 1.6.6
-    
-          - name: Terraform Init
-            run: terraform init -backend-config="key=simple-log-service-infra/${ENV_VAR}/terraform.tfstate"
-    
-          - name: Select Dev Workspace
-            run: terraform workspace select dev || terraform workspace new dev
-    
-          # Sync state with actual infrastructure
-          - name: Terraform Refresh
-            run: terraform refresh
-    
-          # terraform fix format
-          - name: Terraform format
-            run: terraform fmt -recursive
-    
-          # check terraform formatting 
-          - name: Terraform Format Check
-            run: terraform fmt -check
-    
-          # Checks syntax and internal consistency.
-          - name: Terraform Validate
-            run: terraform validate
-    
-          - name: Terraform Plan
-            run: terraform plan -out=tfplan
-    
-          - name: Terraform Apply
-            run: terraform apply -auto-approve tfplan
-    
-          - name: Extract API Gateway URLs from Terraform Output
-            id: extract
-            run: |
-              echo "api_url_writer=$(terraform output -raw writer_api_url)" >> $GITHUB_OUTPUT
-              echo "api_url_reader=$(terraform output -raw reader_api_url)" >> $GITHUB_OUTPUT
-    
-            # Deploy Frontend
-          - name: Trigger S3 Code Deploy
-            uses: peter-evans/repository-dispatch@v2
-            with:
-              token: ${{ secrets.TOKEN }}
-              repository: makgopajm/simple-log-service
-              event-type: deploy-frontend
-              client-payload: >-
-                {
-                  "writer_url": "${{ steps.extract.outputs.api_url_writer }}",
-                  "reader_url": "${{ steps.extract.outputs.api_url_reader }}"
-                }
+    name: Terraform-Apply-dispatch
+    runs-on: ubuntu-latest
+    environment: AWS
+    outputs:
+      api_url_writer: ${{ steps.extract.outputs.api_url_writer }}
+      api_url_reader: ${{ steps.extract.outputs.api_url_reader }}
+      s3_bucket_name: ${{ steps.extract.outputs.s3_bucket_name }}
+    if: github.event_name == 'repository_dispatch'
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # OIDC - To get temporary credentials from AWS
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ env.OIDC_ROLE }}
+          aws-region: us-east-1
+
+      # Setup Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: terraform init -backend-config="key=simple-log-service-infra/${ENV_VAR}/terraform.tfstate"
+
+      - name: Select Dev Workspace
+        run: terraform workspace select dev || terraform workspace new dev
+
+      # Sync state with actual infrastructure
+      - name: Terraform Refresh
+        run: terraform refresh
+
+      # Terraform formatting fixes
+      - name: Terraform format
+        run: terraform fmt -recursive
+
+      # Check terraform formatting 
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      # Validate Terraform config
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+      - name: Extract outputs from Terraform
+        id: extract
+        run: |
+          base_url=$(terraform output -raw api_gw_url)
+          echo "api_url_writer=${base_url}/write-logs" >> $GITHUB_OUTPUT
+          echo "api_url_reader=${base_url}/read-logs" >> $GITHUB_OUTPUT
+          echo "s3_bucket_name=$(terraform output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
+
+      # Trigger frontend deployment via repository_dispatch with all URLs and bucket name
+      - name: Trigger S3 Code Deploy
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.TOKEN }}
+          repository: makgopajm/simple-log-service
+          event-type: deploy-frontend
+          client-payload: >-
+            {
+              "writer_url": "${{ steps.extract.outputs.api_url_writer }}",
+              "reader_url": "${{ steps.extract.outputs.api_url_reader }}",
+              "s3_bucket_name": "${{ steps.extract.outputs.s3_bucket_name }}"
+            }

@@ -66,7 +66,7 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -target=module.simple_log_service_ecr_write_image -target=simple_log_service_ecr_read_image -out=tfplan
+        run: terraform plan -target=module.simple_log_service_ecr_write_image.aws_ecr_repository.basic_ecr -target=simple_log_service_ecr_read_image.aws_ecr_repository.basic_ecr -out=tfplan
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan

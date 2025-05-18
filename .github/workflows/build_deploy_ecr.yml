@@ -71,9 +71,9 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
 
-      # - name: Trigger Docker Image Build (Repo B)
-      #   uses: peter-evans/repository-dispatch@v2
-      #   with:
-      #     token: ${{ secrets.REPO_B_PAT }}
-      #     repository: your-org/repo-b
-      #     event-type: build-lambda-images
+      - name: Trigger Docker Image Build
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.TOKEN }}
+          repository: makgopajm/simple-log-service
+          event-type: build-lambda-images

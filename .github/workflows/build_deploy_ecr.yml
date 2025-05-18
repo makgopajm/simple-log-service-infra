@@ -44,7 +44,7 @@ jobs:
         run: terraform init -backend-config="key=simple-log-service-infra/${ENV_VAR}/terraform.tfstate"
 
       - name: Select Dev Workspace
-        run: terraform workspace select ${{env.ENV_VAR}} || terraform workspace new ${{env.ENV_VAR}
+        run: terraform workspace select ${{env.ENV_VAR}} || terraform workspace new ${{env.ENV_VAR}}
 
       # Sync state with actual infrastructure
       - name: Terraform Refresh

@@ -5,6 +5,14 @@
 name: Build & Deploy ECR
 
 on:
+  on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+  repository_dispatch:
+    types: [deploy-infra]
   workflow_dispatch:
 
 # Define variables, so that they can be reused. The variable are stored as GitHub secrets.

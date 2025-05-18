@@ -1,13 +1,8 @@
 # Destroys resource when no longer needed.
 
-name: Destroy Terraform Infrastructure from AWS
+name: Destroy Infrastructure
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
-  #   types:
-  #     - closed
   workflow_dispatch:
 
 env:

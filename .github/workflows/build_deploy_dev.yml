@@ -12,6 +12,8 @@ on:
     types:
       - closed
   workflow_dispatch:
+  repository_dispatch:
+    types: [deploy-infra]
 
 # Define variables, so that they can be reused. The variable are stored as GitHub secrets.
 env:
@@ -25,6 +27,9 @@ jobs:
     name: Terraform-Apply
     runs-on: ubuntu-latest
     environment: AWS
+    outputs:
+      api_url_writer: ${{ steps.extract.outputs.api_url_writer }}
+      api_url_reader: ${{ steps.extract.outputs.api_url_reader }}
     if: github.event.pull_request.merged == true && contains(join(github.event.pull_request.labels.*.name, ','), 'dev')
 
     permissions:
@@ -75,3 +80,22 @@ jobs:
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
+
+      - name: Extract API Gateway URLs from Terraform Output
+        id: extract
+        run: |
+          echo "api_url_writer=$(terraform output -raw writer_api_url)" >> $GITHUB_OUTPUT
+          echo "api_url_reader=$(terraform output -raw reader_api_url)" >> $GITHUB_OUTPUT
+
+        # Deploy Frontend
+      - name: Trigger S3 Code Deploy
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.TOKEN }}
+          repository: makgopajm/simple-log-service
+          event-type: deploy-frontend
+          client-payload: >-
+            {
+              "writer_url": "${{ steps.extract.outputs.api_url_writer }}",
+              "reader_url": "${{ steps.extract.outputs.api_url_reader }}"
+            }

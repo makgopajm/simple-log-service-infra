@@ -1,0 +1,76 @@
+# Automate Terraform infrastructure builds into AWS using GitHub Actions.
+# This workflow applies changes when its executed manually.
+
+# Workflow name
+name: Build & Deploy ECR
+
+on:
+  workflow_dispatch:
+
+# Define variables, so that they can be reused. The variable are stored as GitHub secrets.
+env:
+  OIDC_ROLE: ${{ secrets.GITHUBACTIONSROLE }}
+  AWS_ACCOUNT_ID: ${{ secrets.ACCOUNT }}
+  ENV_VAR: dev
+
+jobs:
+  setup-ecr:
+    runs-on: ubuntu-latest
+    name: Create ECR repos
+
+    
+    permissions:
+        id-token: write
+        contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ env.OIDC_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+              # Sets up Terraform CLI version 1.6.6 in the GitHub Actions runner using the official HashiCorp action.
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: terraform init -backend-config="key=simple-log-service-infra/${ENV_VAR}/terraform.tfstate"
+
+      - name: Select Dev Workspace
+        run: terraform workspace select ${{env.ENV_VAR}} || terraform workspace new ${{env.ENV_VAR}
+
+      # Sync state with actual infrastructure
+      - name: Terraform Refresh
+        run: terraform refresh
+
+      # terraform fix format
+      - name: Terraform format
+        run: terraform fmt -recursive
+
+      # check terraform formatting 
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      # Checks syntax and internal consistency.
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan target=module.simple_log_service_ecr_write_image -target=simple_log_service_ecr_read_image -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+      # - name: Trigger Docker Image Build (Repo B)
+      #   uses: peter-evans/repository-dispatch@v2
+      #   with:
+      #     token: ${{ secrets.REPO_B_PAT }}
+      #     repository: your-org/repo-b
+      #     event-type: build-lambda-images

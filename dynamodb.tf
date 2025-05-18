@@ -8,10 +8,10 @@ resource "aws_dynamodb_table" "simple_log_service_dynamodb" {
     billing_mode = "PROVISIONED"
     read_capacity = 1
     write_capacity = 1
-    hash_key = "Log_ID"
+    hash_key = "log_id"
 
     attribute {
-      name = "Log_ID"
+      name = "log_id"
       type = "S"
     }
 

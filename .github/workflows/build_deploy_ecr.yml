@@ -17,6 +17,7 @@ env:
 jobs:
   setup-ecr:
     runs-on: ubuntu-latest
+    environment: AWS
     name: Create ECR repos
 
     

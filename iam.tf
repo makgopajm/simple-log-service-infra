@@ -6,6 +6,12 @@
 
 resource "aws_dynamodb_resource_policy" "dynamodb_resource_policy" {
     resource_arn = aws_dynamodb_table.simple_log_service_dynamodb.arn
+
+    depends_on = [
+        module.lambda_writer_role,
+        module.lambda_reader_role
+    ]
+
     policy = jsonencode({
         Version = "2012-10-17",
         Statement = [
@@ -14,8 +20,8 @@ resource "aws_dynamodb_resource_policy" "dynamodb_resource_policy" {
                 Effect = "Allow",
                 Principal = {
                     AWS = [
-                        "${module.lambda_writer_role.role_arn}",
-                        "${module.lambda_reader_role.role_arn}"
+                         module.lambda_writer_role.role_arn,
+                         module.lambda_reader_role.role_arn
                     ]
                 }
                 Action = [
@@ -27,7 +33,7 @@ resource "aws_dynamodb_resource_policy" "dynamodb_resource_policy" {
 
 
                 ],
-                Resource = "${aws_dynamodb_table.simple_log_service_dynamodb.arn}"
+                Resource = aws_dynamodb_table.simple_log_service_dynamodb.arn
             }
         ]
  } )

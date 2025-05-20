@@ -17,14 +17,76 @@ env:
   OIDC_ROLE: ${{ secrets.GITHUBACTIONSROLE }}
   AWS_ACCOUNT_ID: ${{ secrets.ACCOUNT }}
   ENV_VAR: dev
-  AWS_REGION: us-east-1
 
 jobs:
-  setup-ecr:
+  build_ecr_pr:
     runs-on: ubuntu-latest
     environment: AWS
     name: Create ECR repos
+    if: github.event.pull_request.merged == true && contains(join(github.event.pull_request.labels.*.name, ','), 'build_deploy_ecr')
+    
+    permissions:
+        id-token: write
+        contents: read
 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ env.OIDC_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: github-actions
+
+        # Sets up Terraform CLI version 1.6.6 in the GitHub Actions runner using the official HashiCorp action.
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: terraform init -backend-config="key=simple-log-service-infra/${{ env.ENV_VAR }}/terraform.tfstate"
+
+      - name: Select Dev Workspace
+        run: terraform workspace select ${{ env.ENV_VAR }} || terraform workspace new ${{ env.ENV_VAR }}
+
+      # Sync state with actual infrastructure
+      - name: Terraform Refresh
+        run: terraform refresh
+
+      # terraform fix format
+      - name: Terraform format
+        run: terraform fmt -recursive
+
+      # check terraform formatting 
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      # Checks syntax and internal consistency.
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -target=module.simple_log_service_ecr_write_image.aws_ecr_repository.basic_ecr -target=module.simple_log_service_ecr_read_image.aws_ecr_repository.basic_ecr -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+      - name: Trigger Docker Image Build
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.TOKEN }}
+          repository: makgopajm/simple-log-service
+          event-type: build-lambda-images
+
+  Build_ecr_dispatch:
+    runs-on: ubuntu-latest
+    environment: AWS
+    name: Create ECR repos
+    if: github.event_name == 'workflow_dispatch_dispatch'
     
     permissions:
         id-token: write

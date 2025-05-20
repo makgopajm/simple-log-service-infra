@@ -31,7 +31,7 @@ resource "aws_cloudfront_distribution" "site" {
     }
   }
 
-  aliases = ["www.urbanversatile.com"]
+  aliases = ["logging-service.urbanversatile.com"]
 
   viewer_certificate {
     acm_certificate_arn      = aws_acm_certificate_validation.cert.certificate_arn

@@ -39,25 +39,33 @@ resource "aws_dynamodb_resource_policy" "dynamodb_resource_policy" {
 # S3 Bucket Policy - Provides access to the objects stored in the bucket
 
 resource "aws_s3_bucket_policy" "s3_bucket_policy" {
-    bucket = aws_s3_bucket.simple_log_service_s3_bucket.id
-    policy = jsonencode(
-        {
-            Version = "2012-10-17",
-            Statement = [
-                {
-                    Sid = "PublicAccess",
-                    Effect = "Allow",
-                    Principal = "*",
-                    Action = "s3:GetObject",
-                    Resource = "${aws_s3_bucket.simple_log_service_s3_bucket.arn}/*"
-                }
-            ]
-        }
-    )
+  bucket = aws_s3_bucket.simple_log_service_s3_bucket.id
 
-    depends_on = [ aws_s3_bucket_public_access_block.simple_log_service_s3_public_block ]
-  
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "AllowCloudFrontAccessOnly"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.simple_log_service_s3_bucket.arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${aws_cloudfront_distribution.site.id}"
+          }
+        }
+      }
+    ]
+  })
+
+  depends_on = [
+    aws_s3_bucket_public_access_block.simple_log_service_s3_public_block
+  ]
 }
+
 
 # Lambda Execution role - To allow lambda to read and write from DynamoDB table and CloudWatch Logs
 

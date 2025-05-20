@@ -86,7 +86,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: AWS
     name: Create ECR repos
-    if: github.event_name == 'workflow_dispatch_dispatch'
+    if: github.event_name == 'workflow_dispatch'
     
     permissions:
         id-token: write

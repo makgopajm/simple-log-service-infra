@@ -14,10 +14,8 @@ resource "aws_dynamodb_resource_policy" "dynamodb_resource_policy" {
                 Effect = "Allow",
                 Principal = {
                     AWS = [
-                        "${aws_iam_role.lambda_write_role.arn}",
-                        "arn:aws:iam::016015284752:role/GitHub_IAM_Role",
-                        "arn:aws:iam::016015284752:user/JB_Admin" # 2 for reader and writer lambda IAM role
-
+                        "${module.lambda_writer_role.role_arn}",
+                        "${module.lambda_reader_role.role_arn}"
                     ]
                 }
                 Action = [
@@ -67,80 +65,23 @@ resource "aws_s3_bucket_policy" "s3_bucket_policy" {
 }
 
 
-# Lambda Execution role - To allow lambda to read and write from DynamoDB table and CloudWatch Logs
-
-resource "aws_iam_role" "lambda_write_role" {
-    name ="${var.product_name}"
-
-    assume_role_policy = jsonencode(
-        {
-            Version = "2012-10-17",
-            Statement = [
-                {
-                    Effect = "Allow",
-                    Principal = {
-                        Service = "lambda.amazonaws.com"
-                    },
-                    Action = "sts:AssumeRole"
-                }
-            ]
-        }
-    )
-  
+module "lambda_writer_role" {
+  source             = "./modules/iam"
+  role_name          = "lambda-writer"
+  env                = var.env
+  dynamodb_table_arn = aws_dynamodb_table.simple_log_service_dynamodb.arn
+  lambda_type        = "writer"
 }
 
-resource "aws_iam_role_policy_attachment" "attach_Lambda_Role_To_Policy" {
-  role       = aws_iam_role.lambda_write_role.name
-  policy_arn = aws_iam_policy.lambda_dynamodb_logs_policy.arn
+
+module "lambda_reader_role" {
+  source             = "./modules/iam"
+  role_name          = "lambda-reader"
+  env                = var.env
+  dynamodb_table_arn = aws_dynamodb_table.simple_log_service_dynamodb.arn
+  lambda_type        = "reader"
 }
 
-resource "aws_iam_policy" "lambda_dynamodb_logs_policy" {
-    name = var.env
-    description = "Allows Lambda to access DynamoDB and CloudWatch Logs"
 
-    policy = jsonencode(
-        {
-            Version = "2012-10-17",
-            Statement = [
-                {
-                    Sid = "DynamoDBAccess",
-                    Effect = "Allow",
-                    Action = [
-                        "dynamodb:GetItem",
-                        "dynamodb:PutItem",
-                        "dynamodb:UpdateItem",
-                        "dynamodb:DeleteItem"
-                    ],
-                     Resource = "${aws_dynamodb_table.simple_log_service_dynamodb.arn}"
-                },
-                {
-                    Sid = "CloudWatchLogsAccess",
-                    Effect= "Allow",
-                    Action = [
-                        "logs:CreatLogGroup",
-                        "logs:CreateLogStream",
-                        "logs:PutLogEvents"
-                    ],
-                    Resource = "*" # Come back and change
-                },
-                {
-                    Effect ="Allow",
-                    Action = [
-                        "ecr:GetDownloadUrlForLayer",
-                        "ecr:BatchGetImage",
-                        "ecr:BatchCheckLayerAvailability"
-                     ],
-                    Resource = "*"
-                },
-                {
-                    Effect ="Allow",
-                    Action = [
-                        "ecr:GetAuthorizationToken"
-                     ],
-                    Resource = "*"
-                }
-            ]
-        }
-    )
-  
-}
+
+

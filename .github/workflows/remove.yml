@@ -17,7 +17,6 @@ jobs:
     name: Terraform-Destroy
     runs-on: ubuntu-latest
     environment: AWS
-    # if: github.event.pull_request.merged == true && contains(join(github.event.pull_request.labels.*.name, ','), 'destroy')
 
     # Grants the workflow secure AWS access via OIDC (id-token: write) and read-only repo access (contents: read).
     permissions:
@@ -44,7 +43,7 @@ jobs:
         run: terraform init -backend-config="key=${STATE_KEY}"
 
       - name: Select Dev Workspace
-        run: terraform workspace select dev || terraform workspace new dev
+        run: terraform workspace select ${{ env.ENV_VAR }} || terraform workspace new ${{ env.ENV_VAR }}
       
       # Sync state with actual infrastructure
       - name: Terraform Refresh

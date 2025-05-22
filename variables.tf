@@ -38,3 +38,7 @@ variable "rd_image_tag" {
   description = "ECR Image Tag"
   default = "6"
 }
+
+variable "domain_name" {
+  description = "Domain name"
+}

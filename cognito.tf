@@ -8,7 +8,7 @@ resource "aws_cognito_user_pool" "log_service_user_pool" {
 
 # User Pool Client
 
-resource "aws_cognito_managed_user_pool_client" "log_service_user_pool_client" {
+resource "aws_cognito_user_pool_client" "log_service_user_pool_client" {
   name         = "${var.product_name}-user-pool-client"
   user_pool_id = aws_cognito_user_pool.log_service_user_pool.id
   generate_secret = false

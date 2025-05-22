@@ -148,6 +148,7 @@ resource "aws_api_gateway_method" "simple_log_service_get"{
 }
 
 resource "aws_api_gateway_method_response" "read_logs_200" {
+  depends_on = [aws_api_gateway_method.simple_log_service_get]
   rest_api_id = aws_api_gateway_rest_api.simple_log_service_api.id
   resource_id = aws_api_gateway_resource.simple_log_service_api_read.id
   http_method = "GET"

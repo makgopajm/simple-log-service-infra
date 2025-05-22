@@ -41,4 +41,5 @@ variable "rd_image_tag" {
 
 variable "domain_name" {
   description = "Domain name"
+  default = "logging-service.urbanversatile.com"
 }

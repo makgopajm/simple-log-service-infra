@@ -32,5 +32,6 @@ output "user_pool_client_id" {
 # output cognito domain
 
 output "cognito_domain" {
-  value = aws_cognito_user_pool_domain.log_service_domain.domain
+  # value = aws_cognito_user_pool_domain.log_service_domain.domain
+  value = "${aws_cognito_user_pool_domain.log_service_domain.domain}.auth.us-east-1.amazoncognito.com"
 }

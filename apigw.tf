@@ -100,6 +100,7 @@ resource "aws_lambda_permission" "allow_apigw_invoke_write" {
 
 
 resource "aws_api_gateway_method_response" "post_write_logs_200" {
+   depends_on  = [aws_api_gateway_method.simple_log_service_post]
   rest_api_id = aws_api_gateway_rest_api.simple_log_service_api.id
   resource_id = aws_api_gateway_resource.simple_log_service_api_write.id
   http_method = "POST"
@@ -112,6 +113,7 @@ resource "aws_api_gateway_method_response" "post_write_logs_200" {
 }
 
 resource "aws_api_gateway_integration_response" "post_write_logs_200" {
+   depends_on  = [aws_api_gateway_method.simple_log_service_post]
   rest_api_id = aws_api_gateway_rest_api.simple_log_service_api.id
   resource_id = aws_api_gateway_resource.simple_log_service_api_write.id
   http_method = "POST"

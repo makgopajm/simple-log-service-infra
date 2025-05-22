@@ -28,7 +28,6 @@ resource "aws_cloudfront_distribution" "site" {
       cookies {
         forward = "none"
       }
-      headers = ["*"]  # Forward all headers to disable caching
     }
 
     min_ttl     = 0

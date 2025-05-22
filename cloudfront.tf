@@ -20,11 +20,12 @@ resource "aws_cloudfront_distribution" "site" {
     target_origin_id       = "s3Origin"
     viewer_protocol_policy = "redirect-to-https"
 
-    allowed_methods  = ["GET", "HEAD"]
+    allowed_methods  = ["GET", "HEAD","OPTIONS","POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
 
     forwarded_values {
       query_string = true
+      headers = ["Authorization"]
       cookies {
         forward = "none"
       }
@@ -68,6 +69,7 @@ resource "aws_s3_bucket_policy" "allow_cloudfront_oac" {
   bucket = aws_s3_bucket.simple_log_service_s3_bucket.id
 
   policy = jsonencode({
+
     Version = "2012-10-17",
     Statement = [
       {

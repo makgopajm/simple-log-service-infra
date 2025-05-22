@@ -85,6 +85,10 @@ jobs:
           echo "api_url_writer=${base_url}${ENV_VAR}/write-logs" >> $GITHUB_OUTPUT
           echo "api_url_reader=${base_url}${ENV_VAR}/read-logs" >> $GITHUB_OUTPUT
           echo "s3_bucket_name=$(terraform output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
+          echo "cognito_region=$(terraform output -raw cognito_region)" >> $GITHUB_OUTPUT
+          echo "user_pool_id=$(terraform output -raw user_pool_id)" >> $GITHUB_OUTPUT
+          echo "user_pool_client_id=$(terraform output -raw user_pool_client_id)" >> $GITHUB_OUTPUT
+          echo "cognito_domain=$(terraform output -raw cognito_domain)" >> $GITHUB_OUTPUT
 
       # Trigger frontend deployment via repository_dispatch with all URLs and bucket name
       - name: Trigger S3 Code Deploy
@@ -97,7 +101,11 @@ jobs:
             {
               "writer_url": "${{ steps.extract.outputs.api_url_writer }}",
               "reader_url": "${{ steps.extract.outputs.api_url_reader }}",
-              "s3_bucket_name": "${{ steps.extract.outputs.s3_bucket_name }}"
+              "s3_bucket_name": "${{ steps.extract.outputs.s3_bucket_name }}",
+              "region": "${{ steps.extract.outputs.cognito_region }}",
+              "user_pool_id": "${{ steps.extract.outputs.user_pool_id }}",
+              "user_pool_client_id": "${{ steps.extract.outputs.user_pool_client_id }}",
+              "cognito_domain": "${{ steps.extract.outputs.cognito_domain }}"
             }
 
   terraform_dispatch:
@@ -166,6 +174,10 @@ jobs:
           echo "api_url_writer=${base_url}${ENV_VAR}/write-logs" >> $GITHUB_OUTPUT
           echo "api_url_reader=${base_url}${ENV_VAR}/read-logs" >> $GITHUB_OUTPUT
           echo "s3_bucket_name=$(terraform output -raw s3_bucket_name)" >> $GITHUB_OUTPUT
+          echo "cognito_region=$(terraform output -raw cognito_region)" >> $GITHUB_OUTPUT
+          echo "user_pool_id=$(terraform output -raw user_pool_id)" >> $GITHUB_OUTPUT
+          echo "user_pool_client_id=$(terraform output -raw user_pool_client_id)" >> $GITHUB_OUTPUT
+          echo "cognito_domain=$(terraform output -raw cognito_domain)" >> $GITHUB_OUTPUT
 
       # Trigger frontend deployment via repository_dispatch with all URLs and bucket name
       - name: Trigger S3 Code Deploy
@@ -178,5 +190,9 @@ jobs:
             {
               "writer_url": "${{ steps.extract.outputs.api_url_writer }}",
               "reader_url": "${{ steps.extract.outputs.api_url_reader }}",
-              "s3_bucket_name": "${{ steps.extract.outputs.s3_bucket_name }}"
+              "s3_bucket_name": "${{ steps.extract.outputs.s3_bucket_name }}",
+              "region": "${{ steps.extract.outputs.cognito_region }}",
+              "user_pool_id": "${{ steps.extract.outputs.user_pool_id }}",
+              "user_pool_client_id": "${{ steps.extract.outputs.user_pool_client_id }}",
+              "cognito_domain": "${{ steps.extract.outputs.cognito_domain }}"
             }

@@ -98,6 +98,37 @@ resource "aws_lambda_permission" "allow_apigw_invoke_write" {
   source_arn = "${aws_api_gateway_rest_api.simple_log_service_api.execution_arn}/*/*/write-logs"
 }
 
+
+resource "aws_api_gateway_method_response" "post_write_logs_200" {
+  rest_api_id = aws_api_gateway_rest_api.simple_log_service_api.id
+  resource_id = aws_api_gateway_resource.simple_log_service_api_write.id
+  http_method = "POST"
+  status_code = "200" # or "201" if your Lambda returns that
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = true
+    "method.response.header.Access-Control-Allow-Credentials" = true
+  }
+}
+
+resource "aws_api_gateway_integration_response" "post_write_logs_200" {
+  rest_api_id = aws_api_gateway_rest_api.simple_log_service_api.id
+  resource_id = aws_api_gateway_resource.simple_log_service_api_write.id
+  http_method = "POST"
+  status_code = aws_api_gateway_method_response.post_write_logs_200.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = "'https://logging-service.urbanversatile.com'"
+    "method.response.header.Access-Control-Allow-Credentials" = "'true'"
+  }
+
+  response_templates = {
+    "application/json" = ""
+  }
+}
+
+
+
 /** Configurations for the read endpoint **/
 
 resource "aws_api_gateway_resource" "simple_log_service_api_read" {
@@ -125,9 +156,16 @@ resource "aws_api_gateway_integration" "simple_log_service_read_integration" {
 }
 
 resource "aws_api_gateway_deployment" "simple_log_service_api_deployment" {
-    depends_on = [ aws_api_gateway_integration.simple_log_service_write_integration,
-    aws_api_gateway_integration.simple_log_service_read_integration, aws_api_gateway_integration.options_write_logs,
-  aws_api_gateway_integration.simple_log_service_options_integration ]
+    depends_on = [ 
+          aws_api_gateway_integration.simple_log_service_write_integration,
+          aws_api_gateway_method_response.post_write_logs_200,
+          aws_api_gateway_integration_response.post_write_logs_200,
+          aws_api_gateway_integration.simple_log_service_read_integration,
+          aws_api_gateway_integration.options_write_logs,
+          aws_api_gateway_integration.simple_log_service_options_integration
+  
+    
+    ]
 
     rest_api_id = aws_api_gateway_rest_api.simple_log_service_api.id
     triggers = {

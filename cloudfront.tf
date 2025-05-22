@@ -63,8 +63,6 @@ resource "aws_cloudfront_distribution" "site" {
 
   depends_on = [aws_acm_certificate_validation.cert]
 }
-
-
 resource "aws_s3_bucket_policy" "allow_cloudfront_oac" {
   bucket = aws_s3_bucket.simple_log_service_s3_bucket.id
 

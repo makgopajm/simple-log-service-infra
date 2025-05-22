@@ -20,7 +20,7 @@ resource "aws_cloudfront_distribution" "site" {
     target_origin_id       = "s3Origin"
     viewer_protocol_policy = "redirect-to-https"
 
-    allowed_methods  = ["GET", "HEAD","OPTIONS","POST", "PUT"]
+    allowed_methods  = ["GET", "HEAD","OPTIONS","POST", "PUT", "DELETE", "PATCH" ]
     cached_methods   = ["GET", "HEAD"]
 
     forwarded_values {

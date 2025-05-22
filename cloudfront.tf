@@ -21,30 +21,31 @@ resource "aws_cloudfront_distribution" "site" {
     viewer_protocol_policy = "redirect-to-https"
 
     allowed_methods  = ["GET", "HEAD"]
-    cached_methods   = ["GET", "HEAD"]
+    cached_methods   = []  # No caching
 
     forwarded_values {
       query_string = true
       cookies {
         forward = "none"
       }
+      headers = ["*"]  # Forward all headers to disable caching
     }
 
     min_ttl     = 0
-    default_ttl = 3600
-    max_ttl     = 86400
+    default_ttl = 0
+    max_ttl     = 0
   }
 
   custom_error_response {
-    error_code            = 403
-    response_code         = 200
-    response_page_path    = "/index.html"
+    error_code         = 403
+    response_code      = 200
+    response_page_path = "/index.html"
   }
 
   custom_error_response {
-    error_code            = 404
-    response_code         = 200
-    response_page_path    = "/index.html"
+    error_code         = 404
+    response_code      = 200
+    response_page_path = "/index.html"
   }
 
   aliases = ["logging-service.urbanversatile.com"]
@@ -63,6 +64,7 @@ resource "aws_cloudfront_distribution" "site" {
 
   depends_on = [aws_acm_certificate_validation.cert]
 }
+
 resource "aws_s3_bucket_policy" "allow_cloudfront_oac" {
   bucket = aws_s3_bucket.simple_log_service_s3_bucket.id
 

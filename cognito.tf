@@ -12,8 +12,7 @@ resource "aws_cognito_user_pool_client" "log_service_user_pool_client" {
   name         = "${var.product_name}-user-pool-client"
   user_pool_id = aws_cognito_user_pool.log_service_user_pool.id
   generate_secret = false
-
-  allowed_oauth_flows                  = ["code"]
+  allowed_oauth_flows                  = ["code","implicit"]
   allowed_oauth_scopes                = ["email", "openid", "profile"]
   allowed_oauth_flows_user_pool_client = true
   callback_urls                        = ["https://${var.domain_name}/"]

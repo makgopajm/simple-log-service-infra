@@ -1,16 +1,16 @@
 # Simple Logging Service Infrastructure
 
-This project sets up a serverless logging service on AWS using S3 and Lambda, API gateway and DynamoDB.
-
 This project implements a **secure, serverless logging platform on AWS**, designed for scalable log ingestion and retrieval. It follows cloud-native best practices including:
 
+- **Secure Authentication**
+- **Serverless and Scalable Architecture**
 - **Infrastructure as Code (Terraform)**
+- **Least privilege and IAM Control**
 - **CI/CD using GitHub Actions**
-- **Least privilege IAM roles**
+- **Observability-Ready**
 - **Encrypted data at rest and in transit**
 - **Security scanning integrated into the pipeline**
-
-It allows clients or applications to send logs via an API, which are processed by Lambda functions and stored in DynamoDB for efficient querying. A frontend (optional) can also visualize logs by querying the API.
+- **Tested for Common Security Issues**
 
 ## Architecture Diagram
 
@@ -25,21 +25,9 @@ It allows clients or applications to send logs via an API, which are processed b
 | `simple-log-service-infra` | Terraform code and GitHub Actions pipelines       |
 | `simple-log-service`       | Source code: Lambda functions & frontend (if any) |
 
-The components are built and deployed using GitHub Actions CI/CD pipeline with security checks, least privilege IAM roles, and encrypted data handling. To deploy run:
-
-- Workflow: build_deploy_ecr manually
-
-## Features
-
-- Secure AWS Lambda with encrypted data
-- Infrastructure as Code (Terraform)
-- CI/CD with GitHub Actions
-- Pipeline security checks (tfsec, trivy, gitleaks)
-- Docker image build + push to ECR
-- OIDC-based GitHub authentication to AWS (no static keys)
-- Least privilege IAM policies
-
 ## How to Deploy
+
+
 
 ### 1️. Prerequisites
 
@@ -96,17 +84,22 @@ To deploy your infrastructure and application:
 - Push images to ECR
 - Deploy infrastructure and Lambda functions
 
-## Testing & Observability
+## Monitoring & Observability
 
-- View logs in CloudWatch Logs
-- (Optional) Enable AWS X-Ray for tracing
+1. View metrics in CloudWatch metrics
+2. View logs in CloudWatch Logs
+3. (Optional) Enable AWS X-Ray for tracing
 
-**Perform health checks using curl or Postman**
+**Security checks and Testing**
 
-curl -X POST https://<api-id>.execute-api.<region>.amazonaws.com/{stage}/write \
-  -d '{"message": "Service Started"}'
+1. The API should only allow the frontend origin (https://your-domain) to call it: curl -X OPTIONS https://your-api-url/dev/read-logs \
+  -H "Origin: https://evil.com" \
+  -H "Access-Control-Request-Method: GET" \
+  -i
+2. Unauthenticated Access Check - Try accessing the protected endpoint without a token: curl -X GET https://<your-api>/{stage}/read-logs
+3. Tampered Token Check - Use a fake or tampered token: curl -X GET https://<your-api>/{stage}/read-logs -H "Authorization: Bearer faketoken123"
+   
 
-curl https://<api-id>.execute-api.<region>.amazonaws.com/{stage}/read
 
 
 

@@ -25,11 +25,22 @@ This project implements a **secure, serverless logging platform on AWS**, design
 | `simple-log-service-infra` | Terraform code and GitHub Actions pipelines       |
 | `simple-log-service`       | Source code: Lambda functions & frontend (if any) |
 
-## How to Deploy
+# Deployment Workflow
 
+To deploy, trigger the following workflow manually in GitHub Actions: **Workflow: build_deploy_ecr**
 
+## Required Secrets and Environemnt Variables:
 
-### 1️. Prerequisites
+| Name                           | Description                                      |
+|------------------------------- |--------------------------------------------------|
+|ACCOUNT                         | AWS Account the resources will be deployed into  | 
+|GITHUBACTIONSROLE               | OIDC role to allow GitHub actions to get creds   |
+|TOKEN                           | Used for cross workflow and repo triggers        |
+|AWS_REGION                      | The AWS region to deploy into                    |
+|S3_BUCKET_NAME                  | The frontend S3 bucket                           |
+|GET_LOGS_URL                    | API read endpoint                                |
+|WRITE_LOG_URL                   | API write endpoint                               |
+
 
 - AWS Account (Admin role for setup)
 - GitHub Repository connected to AWS via OIDC
@@ -40,9 +51,7 @@ This project implements a **secure, serverless logging platform on AWS**, design
   - 'TOKEN'
   - 'AWS_ACCOUNT'
 
----
-
-### 2. Setup AWS OIDC Role for GitHub Actions
+## Setup AWS OIDC Role for GitHub Actions
 
 1. Create an IAM role with the following trust policy:
    ```json
@@ -67,22 +76,6 @@ Attach a least privilege policy to allow:
 - (Optional) Secrets Manager or CloudWatch access
 
 Save the Role ARN and add it to GitHub as AWS_ROLE_ARN.
-
-#### Running the CI/CD Workflow
-
-To deploy your infrastructure and application:
-
-- Go to your GitHub repository: **simple-log-service-infra** 
-- Open the Actions tab
-- Locate the **build_deploy_ecr** workflow
-- Click "Run workflow" (manual trigger)
-
-#### This will:
-
-- Build Docker images (e.g., for Lambda functions)
-- Run tfsec, trivy, gitleaks
-- Push images to ECR
-- Deploy infrastructure and Lambda functions
 
 ## Monitoring & Observability
 
